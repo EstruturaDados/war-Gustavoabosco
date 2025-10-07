@@ -1,98 +1,124 @@
 // ============================================================================
 //         PROJETO WAR ESTRUTURADO - DESAFIO DE CÓDIGO
 // ============================================================================
-//        
-// ============================================================================
-//
-// OBJETIVOS:
-// - Modularizar completamente o código em funções especializadas.
-// - Implementar um sistema de missões para um jogador.
-// - Criar uma função para verificar se a missão foi cumprida.
-// - Utilizar passagem por referência (ponteiros) para modificar dados e
-//   passagem por valor/referência constante (const) para apenas ler.
-// - Foco em: Design de software, modularização, const correctness, lógica de jogo.
-//
-// ============================================================================
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
 
-// Inclusão das bibliotecas padrão necessárias para entrada/saída, alocação de memória, manipulação de strings e tempo.
+#define MAX_TERRITORIOS 5
+#define MAX_NOME 50
+#define MAX_COR 20
 
-// --- Constantes Globais ---
-// Definem valores fixos para o número de territórios, missões e tamanho máximo de strings, facilitando a manutenção.
+// Struct para representar um território
+typedef struct {
+    char nome[MAX_NOME];
+    char cor[MAX_COR];
+    int tropas;
+} Territorio;
 
-// --- Estrutura de Dados ---
-// Define a estrutura para um território, contendo seu nome, a cor do exército que o domina e o número de tropas.
+// Função para cadastrar territórios
+void cadastrar_territorios(Territorio* territorios) {
+    for (int i = 0; i < MAX_TERRITORIOS; i++) {
+        printf("Digite o nome do território %d: ", i + 1);
+        fgets(territorios[i].nome, MAX_NOME, stdin);
+        territorios[i].nome[strcspn(territorios[i].nome, "\n")] = 0;
 
-// --- Protótipos das Funções ---
-// Declarações antecipadas de todas as funções que serão usadas no programa, organizadas por categoria.
-// Funções de setup e gerenciamento de memória:
-// Funções de interface com o usuário:
-// Funções de lógica principal do jogo:
-// Função utilitária:
+        printf("Digite a cor do exército do território %d: ", i + 1);
+        fgets(territorios[i].cor, MAX_COR, stdin);
+        territorios[i].cor[strcspn(territorios[i].cor, "\n")] = 0;
 
-// --- Função Principal (main) ---
-// Função principal que orquestra o fluxo do jogo, chamando as outras funções em ordem.
-int main() {
-    // 1. Configuração Inicial (Setup):
-    // - Define o locale para português.
-    // - Inicializa a semente para geração de números aleatórios com base no tempo atual.
-    // - Aloca a memória para o mapa do mundo e verifica se a alocação foi bem-sucedida.
-    // - Preenche os territórios com seus dados iniciais (tropas, donos, etc.).
-    // - Define a cor do jogador e sorteia sua missão secreta.
+        printf("Digite o número de tropas do território %d: ", i + 1);
+        scanf("%d", &territorios[i].tropas);
+        getchar(); // Consumir o caractere newline
+    }
+}
 
-    // 2. Laço Principal do Jogo (Game Loop):
-    // - Roda em um loop 'do-while' que continua até o jogador sair (opção 0) ou vencer.
-    // - A cada iteração, exibe o mapa, a missão e o menu de ações.
-    // - Lê a escolha do jogador e usa um 'switch' para chamar a função apropriada:
-    //   - Opção 1: Inicia a fase de ataque.
-    //   - Opção 2: Verifica se a condição de vitória foi alcançada e informa o jogador.
-    //   - Opção 0: Encerra o jogo.
-    // - Pausa a execução para que o jogador possa ler os resultados antes da próxima rodada.
+// Função para exibir o estado atual do mapa
+void exibir_mapa(Territorio* territorios) {
+    printf("Estado atual do mapa:\n");
+    for (int i = 0; i < MAX_TERRITORIOS; i++) {
+        printf("Território %d: %s - Cor: %s - Tropas: %d\n", i + 1, territorios[i].nome, territorios[i].cor, territorios[i].tropas);
+    }
+}
 
-    // 3. Limpeza:
-    // - Ao final do jogo, libera a memória alocada para o mapa para evitar vazamentos de memória.
+// Função para simular uma batalha
+void batalha(Territorio* territorios, int atacante, int defensor) {
+    int dados_atacante = rand() % 6 + 1;
+    int dados_defensor = rand() % 6 + 1;
 
+    printf("Dados do atacante: %d\n", dados_atacante);
+    printf("Dados do defensor: %d\n", dados_defensor);
+
+    if (dados_atacante > dados_defensor) {
+        territorios[defensor].tropas--;
+        printf("Atacante venceu! Defensor perdeu 1 tropa.\n");
+    } else {
+        printf("Defensor defendeu! Nenhuma tropa perdida.\n");
+    }
+}
+
+// Função para verificar se o defensor foi conquistado
+int verificar_conquista(Territorio* territorios, int defensor) {
+    if (territorios[defensor].tropas <= 0) {
+        printf("Território %d foi conquistado!\n", defensor + 1);
+        return 1;
+    }
     return 0;
 }
 
-// --- Implementação das Funções ---
+// Função para o nível Aventureiro
+void nivel_aventureiro() {
+    Territorio* territorios = (Territorio*) calloc(MAX_TERRITORIOS, sizeof(Territorio));
 
-// alocarMapa():
-// Aloca dinamicamente a memória para o vetor de territórios usando calloc.
-// Retorna um ponteiro para a memória alocada ou NULL em caso de falha.
+    cadastrar_territorios(territorios);
+    exibir_mapa(territorios);
 
-// inicializarTerritorios():
-// Preenche os dados iniciais de cada território no mapa (nome, cor do exército, número de tropas).
-// Esta função modifica o mapa passado por referência (ponteiro).
+    srand(time(NULL)); // Inicializar o gerador de números aleatórios
 
-// liberarMemoria():
-// Libera a memória previamente alocada para o mapa usando free.
+    int atacante, defensor;
+    printf("Digite o número do território atacante: ");
+    scanf("%d", &atacante);
+    getchar(); // Consumir o caractere newline
+    atacante--; // Ajustar para índice 0
 
-// exibirMenuPrincipal():
-// Imprime na tela o menu de ações disponíveis para o jogador.
+    printf("Digite o número do território defensor: ");
+    scanf("%d", &defensor);
+    getchar(); // Consumir o caractere newline
+    defensor--; // Ajustar para índice 0
 
-// exibirMapa():
-// Mostra o estado atual de todos os territórios no mapa, formatado como uma tabela.
-// Usa 'const' para garantir que a função apenas leia os dados do mapa, sem modificá-los.
+    batalha(territorios, atacante, defensor);
+    exibir_mapa(territorios);
 
-// exibirMissao():
-// Exibe a descrição da missão atual do jogador com base no ID da missão sorteada.
+    verificar_conquista(territorios, defensor);
 
-// faseDeAtaque():
-// Gerencia a interface para a ação de ataque, solicitando ao jogador os territórios de origem e destino.
-// Chama a função simularAtaque() para executar a lógica da batalha.
+    free(territorios);
+}
 
-// simularAtaque():
-// Executa a lógica de uma batalha entre dois territórios.
-// Realiza validações, rola os dados, compara os resultados e atualiza o número de tropas.
-// Se um território for conquistado, atualiza seu dono e move uma tropa.
+// Função para o nível Mestre
+void nivel_mestre() {
+    // Implementar o sistema de missões e modularização total
+}
 
-// sortearMissao():
-// Sorteia e retorna um ID de missão aleatório para o jogador.
+int main() {
+    int nivel;
+    printf("Escolha o nível: 1 - Novato, 2 - Aventureiro, 3 - Mestre\n");
+    scanf("%d", &nivel);
+    getchar(); // Consumir o caractere newline
 
-// verificarVitoria():
-// Verifica se o jogador cumpriu os requisitos de sua missão atual.
-// Implementa a lógica para cada tipo de missão (destruir um exército ou conquistar um número de territórios).
-// Retorna 1 (verdadeiro) se a missão foi cumprida, e 0 (falso) caso contrário.
+    switch (nivel) {
+        case 1:
+            // Implementar o nível Novato
+            break;
+        case 2:
+            nivel_aventureiro();
+            break;
+        case 3:
+            nivel_mestre();
+            break;
+        default:
+            printf("Nível inválido!\n");
+    }
 
-// limparBufferEntrada():
-// Função utilitária para limpar o buffer de entrada do teclado (stdin), evitando problemas com leituras consecutivas de scanf e getchar.
+    return 0;
+}        
