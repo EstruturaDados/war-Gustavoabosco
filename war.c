@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -122,10 +121,10 @@ void mostrarMissao(Missao missao) {
 // Função principal do jogo
 int main() {
     srand(time(NULL));
-    Territorio *territorios = calloc(NUM_TERRITORIOS, sizeof(Territorio));
+    Territorio *territorios = (Territorio *)calloc(NUM_TERRITORIOS, sizeof(Territorio));
     inicializarTerritorios(territorios);
 
-    Missao missao = rand() % 2;
+    Missao missao = (Missao)(rand() % 2);
     char corJogador[MAX_COR] = "Vermelho";
 
     int opcao;
@@ -163,4 +162,3 @@ int main() {
     free(territorios);
     return 0;
 }
-
