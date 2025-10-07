@@ -175,4 +175,5 @@ int main() {
 
     free(territorios); // libera memória alocada
     return 0;
+}
 
