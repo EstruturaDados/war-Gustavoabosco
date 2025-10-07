@@ -95,9 +95,87 @@ void nivel_aventureiro() {
     free(territorios);
 }
 
+// Função para gerar uma missão aleatória
+void gerar_missao(int* missao) {
+    *missao = rand() % 2 + 1; // Gera uma missão aleatória (1 ou 2)
+}
+
+// Função para verificar se a missão foi cumprida
+void verificar_missao(int missao, Territorio* territorios) {
+    int conquistados = 0;
+    for (int i = 0; i < MAX_TERRITORIOS; i++) {
+        if (strcmp(territorios[i].cor, "Verde") != 0) {
+            conquistados++;
+        }
+    }
+
+    if (missao == 1 && conquistados >= 3) {
+        printf("Missão cumprida! Você conquistou 3 territórios.\n");
+    } else if (missao == 2 && strcmp(territorios[0].cor, "Azul") == 0) {
+        printf("Missão cumprida! Você conquistou o território Azul.\n");
+    } else {
+        printf("Missão não cumprida.\n");
+    }
+}
+
 // Função para o nível Mestre
 void nivel_mestre() {
-    // Implementar o sistema de missões e modularização total
+    Territorio* territorios = (Territorio*) calloc(MAX_TERRITORIOS, sizeof(Territorio));
+
+    cadastrar_territorios(territorios);
+    exibir_mapa(territorios);
+
+    srand(time(NULL)); // Inicializar o gerador de números aleatórios
+
+    int missao;
+    gerar_missao(&missao);
+
+    printf("Missão: ");
+    if (missao == 1) {
+        printf("Conquistar 3 territórios.\n");
+    } else {
+        printf("Conquistar o território Azul.\n");
+    }
+
+    int opcao;
+    do {
+        printf("1 - Atacar\n");
+        printf("2 - Verificar Missão\n");
+        printf("0 - Sair\n");
+        scanf("%d", &opcao);
+        getchar(); // Consumir o caractere newline
+
+        switch (opcao) {
+            case 1: {
+                int atacante, defensor;
+                printf("Digite o número do território atacante: ");
+                scanf("%d", &atacante);
+                getchar(); // Consumir o caractere newline
+                atacante--; // Ajustar para índice 0
+
+                printf("Digite o número do território defensor: ");
+                scanf("%d", &defensor);
+                getchar(); // Consumir o caractere newline
+                defensor--; // Ajustar para índice 0
+
+                batalha(territorios, atacante, defensor);
+                exibir_mapa(territorios);
+
+                verificar_conquista(territorios, defensor);
+                break;
+            }
+            case 2:
+                verificar_missao(missao, territorios);
+                break;
+            case 0:
+                printf("Saindo...\n");
+                break;
+            default:
+                printf("Opção inválida!\n");
+        }
+    } while (opcao != 0);
+
+    free(territorios);
 }
 
 int main() {
@@ -121,4 +199,4 @@ int main() {
     }
 
     return 0;
-}        
+}
